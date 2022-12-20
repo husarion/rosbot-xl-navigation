@@ -1,0 +1,60 @@
+services:
+
+  rosbot-xl:
+    image: husarion/rosbot-xl:humble
+    network_mode: host
+    ipc: host
+    environment:
+      - DDS_CONFIG
+      - RMW_IMPLEMENTATION
+    command: ros2 launch rosbot_xl_bringup bringup.launch.py mecanum:=${MECANUM:-True}
+
+  microros:
+    image: husarion/micro-ros-agent:humble-22-12-07
+    network_mode: host
+    ipc: host
+    environment:
+      - DDS_CONFIG
+      - RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+    command: ros2 run micro_ros_agent micro_ros_agent udp4 --port 8888
+
+  rplidar:
+    image: husarion/rplidar:humble-22-12-07
+    network_mode: host
+    ipc: host
+    devices:
+      - ${LIDAR_SERIAL:?err}:/dev/ttyUSB0
+    environment:
+      - DDS_CONFIG
+      - RMW_IMPLEMENTATION
+    command: ros2 launch sllidar_ros2 sllidar_launch.py serial_baudrate:=${LIDAR_BAUDRATE:-115200}
+
+  navigation:
+    image: husarion/navigation2:humble-22-12-07
+    network_mode: host
+    ipc: host
+    volumes:
+      - ./config/nav2_params.yaml:/nav2_params.yaml
+    environment:
+      - DDS_CONFIG
+      - RMW_IMPLEMENTATION
+    command: >
+      ros2 launch nav2_bringup navigation_launch.py
+        params_file:=/nav2_params.yaml
+        use_sim_time:=${USE_SIM_TIME:-False}
+
+  localization:
+    image: husarion/navigation2:humble-22-12-07
+    network_mode: host
+    ipc: host
+    volumes:
+      - ./config/amcl_params.yaml:/amcl_params.yaml
+      - ./maps:/maps
+    environment:
+      - DDS_CONFIG
+      - RMW_IMPLEMENTATION
+    command: >
+      ros2 launch nav2_bringup localization_launch.py
+        params_file:=/amcl_params.yaml
+        map:=/maps/map.yaml
+        use_sim_time:=${USE_SIM_TIME:-False}
