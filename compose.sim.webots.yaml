@@ -1,0 +1,65 @@
+services:
+
+  rviz:
+    image: husarion/rviz2:humble-22-12-20
+    runtime: nvidia
+    container_name: rviz
+    network_mode: host
+    ipc: host
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ./config/rosbot.rviz:/root/.rviz2/default.rviz
+    environment:
+      - DDS_CONFIG
+      - RMW_IMPLEMENTATION
+      - DISPLAY=${DISPLAY:?err}
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
+
+  rosbot-xl:
+    image: husarion/webots:galactic
+    runtime: nvidia
+    network_mode: host
+    ipc: host
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    environment:
+      - DDS_CONFIG
+      - RMW_IMPLEMENTATION
+      - DISPLAY=${DISPLAY:?err}
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
+    command: ros2 launch webots_ros2_husarion robot_launch.py robot_name:="rosbot_xl"
+
+  navigation:
+    image: husarion/navigation2:humble-22-12-07
+    network_mode: host
+    ipc: host
+    volumes:
+      - ./config/nav2_params.yaml:/nav2_params.yaml
+      # modified behaviour tree that doesn't replan global path
+      # (it is used only when specified by default_nav_to_pose_bt_xml parameter)
+      - ./config/navigate_w_recovery.xml:/navigate_w_recovery.xml
+    environment:
+      - DDS_CONFIG
+      - RMW_IMPLEMENTATION
+    command: >
+      ros2 launch nav2_bringup navigation_launch.py
+        params_file:=/nav2_params.yaml
+        use_sim_time:=true
+
+  localization:
+    image: husarion/navigation2:humble-22-12-07
+    network_mode: host
+    ipc: host
+    volumes:
+      - ./config/amcl_params.yaml:/amcl_params.yaml
+      - ./maps:/maps
+    environment:
+      - DDS_CONFIG
+      - RMW_IMPLEMENTATION
+    command: >
+      ros2 launch nav2_bringup localization_launch.py
+        params_file:=/amcl_params.yaml
+        map:=/maps/map.yaml
+        use_sim_time:=true
