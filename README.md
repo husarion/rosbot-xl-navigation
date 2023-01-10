@@ -83,3 +83,12 @@ Start the containers in a new terminal:
 xhost +local:docker && \
 docker compose -f compose.sim.webots.yaml up
 ```
+
+### Run without Nvidia acceleration
+Comment or delete line inside the compose file `compose.sim.webots.yaml`.
+```bash
+# runtime: nvidia
+...
+# - NVIDIA_VISIBLE_DEVICES=all
+# - NVIDIA_DRIVER_CAPABILITIES=all
+```
