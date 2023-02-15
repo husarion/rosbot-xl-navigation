@@ -31,6 +31,16 @@ DDS_CONFIG=HUSARNET_SIMPLE_AUTO
 
 # RMW_IMPLEMENTATION=rmw_fastrtps_cpp
 RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+
+MECANUM=True
+# MECANUM=False
+
+# AMCL_PARAMS=amcl_params.yaml
+AMCL_PARAMS=amcl_params_mecanum.yaml
+
+# NAV2_PARAMS=nav2_params.yaml
+# NAV2_PARAMS=nav2_params_mecanum.yaml
+NAV2_PARAMS=nav2_params_pure_pursuit.yaml
 ```
 
 **Notes:**
@@ -71,3 +81,15 @@ In the ROSbot's shell execute (in the `/home/husarion/rosbot-xl-navigation` dire
 ```bash
 docker compose -f compose.rosbot.yaml up
 ```
+
+## Alternative configurations
+
+As you probably noticed, there are a few `amcl` and `nav2` parameter config files. You can switch them by modifying the `.env` file.
+
+### Mecanum
+
+Although mecanum wheels will work as well on default configs, you can use these ones to take advantage of an additional degree of freedom. It is necessary to change two env variables - `AMCL_PARAMS` (`robot_model_type` switched to omnidirectional) and `NAV2_PARAMS`. In this demo `DWBLocalPlanner` is configured to move only in the x and y position ignoring orientation.
+
+### Pure pursuit
+
+This config uses a different controller - `RegulatedPurePursuitController` instead of `DWBLocalPlanner` used in the default config. When compared to DWB, movement should be smoother. To use it you have to set `NAV2_PARAMS` to `nav2_params_pure_pursuit.yaml`. It will work on both regular and mecanum wheels (`amcl` parameters can be set to either version).
