@@ -1,7 +1,7 @@
 services:
 
   rosbot-xl:
-    image: husarion/rosbot-xl:humble
+    image: husarion/rosbot-xl:humble-0.3.0-20230204
     network_mode: host
     ipc: host
     environment:
@@ -10,7 +10,7 @@ services:
     command: ros2 launch rosbot_xl_bringup bringup.launch.py mecanum:=${MECANUM:-True}
 
   microros:
-    image: husarion/micro-ros-agent:humble-22-12-07
+    image: husarion/micro-ros-agent:humble-3.1.2-20230204-stable
     network_mode: host
     ipc: host
     environment:
@@ -19,7 +19,7 @@ services:
     command: ros2 run micro_ros_agent micro_ros_agent udp4 --port 8888
 
   rplidar:
-    image: husarion/rplidar:humble-22-12-07
+    image: husarion/rplidar:humble-1.0.1-20230206-stable
     network_mode: host
     ipc: host
     devices:
@@ -30,11 +30,11 @@ services:
     command: ros2 launch sllidar_ros2 sllidar_launch.py serial_baudrate:=${LIDAR_BAUDRATE:-115200}
 
   navigation:
-    image: husarion/navigation2:humble-22-12-07
+    image: husarion/navigation2:humble-1.1.5-20230206-stable
     network_mode: host
     ipc: host
     volumes:
-      - ./config/nav2_params.yaml:/nav2_params.yaml
+      - ./config/${NAV2_PARAMS:-nav2_params.yaml}:/nav2_params.yaml
       # modified behaviour tree that doesn't replan global path
       # (it is used only when specified by default_nav_to_pose_bt_xml parameter)
       - ./config/navigate_w_recovery.xml:/navigate_w_recovery.xml
@@ -47,11 +47,11 @@ services:
         use_sim_time:=${USE_SIM_TIME:-False}
 
   localization:
-    image: husarion/navigation2:humble-22-12-07
+    image: husarion/navigation2:humble-1.1.5-20230206-stable
     network_mode: host
     ipc: host
     volumes:
-      - ./config/amcl_params.yaml:/amcl_params.yaml
+      - ./config/${AMCL_PARAMS:-amcl_params.yaml}:/amcl_params.yaml
       - ./maps:/maps
     environment:
       - DDS_CONFIG
