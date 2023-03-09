@@ -14,7 +14,7 @@ git clone https://github.com/husarion/rosbot-xl-navigation.git
 
 Create a map of the environment using the[rosbot-mapping](https://github.com/husarion/rosbot-xl-mapping) project template.
 
-Copy `rosbot-mapping/maps` folder to `rosbot-navigation/maps` (the same directory as this README).
+Copy `rosbot-xl-mapping/maps` folder to `rosbot-xl-navigation/maps` (the same directory as this README).
 
 Check your configs in `.env` file
 
@@ -93,3 +93,19 @@ Although mecanum wheels will work as well on default configs, you can use these 
 ### Pure pursuit
 
 This config uses a different controller - `RegulatedPurePursuitController` instead of `DWBLocalPlanner` used in the default config. When compared to DWB, movement should be smoother. To use it you have to set `NAV2_PARAMS` to `nav2_params_pure_pursuit.yaml`. It will work on both regular and mecanum wheels (`amcl` parameters can be set to either version).
+
+## Quick Start (Gazebo simulation)
+
+> **Prerequisites**
+>
+> The `compose.sim.gazebo.yaml` file uses NVIDIA Container Runtime. Make sure you have NVIDIA GPU and the [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html) installed.
+
+First please copy `rosbot-xl-mapping/maps` folder (which was created during [mapping](https://github.com/husarion/rosbot-xl-mapping)) to `rosbot-xl-navigation/maps` (the same directory as this README). Then start the containers in a new terminal:
+
+```bash
+xhost +local:docker && \
+docker compose -f compose.sim.gazebo.yaml up
+```
+Start by providing AMCL with an initial pose estimate using `2D Pose Estimate` in RViz. Now you can use `2D Goal Pose` to set destinations.
+
+> It is also possible to modify some options - MECANUM, AMCL_PARAMS, NAV2_PARAMS and RMW_IMPLEMENTATION. For details please refer to previous sections.

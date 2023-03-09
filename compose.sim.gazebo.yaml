@@ -1,0 +1,63 @@
+# Quick Start
+# $ xhost local:root
+# $ docker compose -f compose.sim.gazebo.yaml up
+
+services:
+  rviz:
+    image: husarion/rviz2:galactic-8.5.2-20230204-stable
+    runtime: nvidia
+    network_mode: host
+    ipc: host
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ./config/rosbot.rviz:/root/.rviz2/default.rviz
+    environment:
+      - RMW_IMPLEMENTATION
+      - DISPLAY=${DISPLAY:?err}
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
+
+  rosbot-xl:
+    image: husarion/rosbot-xl-gazebo:humble-0.3.0-20230204
+    runtime: nvidia
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    network_mode: host
+    ipc: host
+    environment:
+      - RMW_IMPLEMENTATION
+      - DISPLAY=${DISPLAY:?err}
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
+    command: ros2 launch rosbot_xl_gazebo simulation.launch.py mecanum:=${MECANUM:-True}
+
+  navigation:
+    image: husarion/navigation2:humble-1.1.5-20230206-stable
+    network_mode: host
+    ipc: host
+    volumes:
+      - ./config/${NAV2_PARAMS:-nav2_params.yaml}:/nav2_params.yaml
+      # modified behaviour tree that doesn't replan global path
+      # (it is used only when specified by default_nav_to_pose_bt_xml parameter)
+      - ./config/navigate_w_recovery.xml:/navigate_w_recovery.xml
+    environment:
+      - RMW_IMPLEMENTATION
+    command: >
+      ros2 launch nav2_bringup navigation_launch.py
+        params_file:=/nav2_params.yaml
+        use_sim_time:=True
+
+  localization:
+    image: husarion/navigation2:humble-1.1.5-20230206-stable
+    network_mode: host
+    ipc: host
+    volumes:
+      - ./config/${AMCL_PARAMS:-amcl_params.yaml}:/amcl_params.yaml
+      - ./maps:/maps
+    environment:
+      - RMW_IMPLEMENTATION
+    command: >
+      ros2 launch nav2_bringup localization_launch.py
+        params_file:=/amcl_params.yaml
+        map:=/maps/map.yaml
+        use_sim_time:=True
