@@ -1,3 +1,6 @@
+> [!IMPORTANT]
+> This repo is deprecated. Visit https://github.com/husarion/rosbot-xl-autonomy instead.
+
 # rosbot-navigation
 
 Setting target point in RViz (running on your PC) for ROSbot XL driving autonomously thanks to Nav2 stack. Works both in the LAN network and [over the Internet](https://husarion.com/manuals/rosbot-xl/remote-access/). 
